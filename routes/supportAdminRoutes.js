@@ -18,6 +18,7 @@ const checkAdmin = (req, res, next) => {
 router.get("/", checkAdmin, async (req, res) => {
   try {
     const tickets = await SupportTicket.find().sort({ createdAt: -1 });
+    console.log("TICKETS FROM DB:", tickets);
     res.json(tickets);
   } catch (err) {
     console.error("Support fetch error:", err);
