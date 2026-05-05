@@ -25,5 +25,6 @@ const salesSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.salesModel ||
-  mongoose.model("salesModel", salesSchema);
+// ✅ FIXED NAME
+export default mongoose.models.SalesLead ||
+  mongoose.model("SalesLead", salesSchema);

@@ -22,6 +22,6 @@ const supportSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// IMPORTANT FIX 👇 prevents OverwriteModelError
-export default mongoose.models.supportModel ||
-  mongoose.model("supportModel", supportSchema);
+// ✅ FIXED NAME
+export default mongoose.models.SupportTicket ||
+  mongoose.model("SupportTicket", supportSchema);
