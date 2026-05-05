@@ -1,17 +1,38 @@
 import express from "express";
+import mongoose from "mongoose";
+
 const router = express.Router();
+
+const salesSchema = new mongoose.Schema(
+  {
+    fullName: String,
+    email: String,
+    phone: String,
+    company: String,
+    product: String,
+    budget: String,
+    message: String,
+    createdAt: { type: Date, default: Date.now },
+  },
+  { strict: false }
+);
+
+const Sales =
+  mongoose.models.Sales || mongoose.model("Sales", salesSchema);
 
 router.post("/", async (req, res) => {
   try {
-    console.log("Sales enquiry:", req.body);
+    console.log("SALES BODY:", req.body);
 
-    // TODO: save to DB here
+    const newSale = await Sales.create(req.body);
 
     res.status(200).json({
-      message: "Sales enquiry received"
+      message: "Sales enquiry saved successfully",
+      data: newSale,
     });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("Sales save error:", err);
+    res.status(500).json({ message: "Failed to save sales enquiry" });
   }
 });
 

@@ -1,32 +1,12 @@
-import express from "express";
-import SalesLead from "../models/salesModel.js";
-import { adminOnly } from "../middleware/auth.js";
+const salesSchema = new mongoose.Schema({}, { strict: false });
+const Sales = mongoose.model("Sales", salesSchema);
 
-const router = express.Router();
-
-// GET ALL LEADS
-router.get("/", adminOnly, async (req, res) => {
-  const leads = await SalesLead.find().sort({ createdAt: -1 });
-  res.json(leads);
+router.get("/", async (req, res) => {
+  try {
+    const data = await Sales.find().sort({ createdAt: -1 });
+    res.json(data);
+  } catch (err) {
+    console.error("Sales admin error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
-
-// UPDATE LEAD STATUS
-router.put("/:id", adminOnly, async (req, res) => {
-  const lead = await SalesLead.findByIdAndUpdate(
-    req.params.id,
-    {
-      leadStatus: req.body.leadStatus,
-    },
-    { new: true }
-  );
-
-  res.json(lead);
-});
-
-// DELETE LEAD
-router.delete("/:id", adminOnly, async (req, res) => {
-  await SalesLead.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
-});
-
-export default router;

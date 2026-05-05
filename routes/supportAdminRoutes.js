@@ -1,30 +1,20 @@
 import express from "express";
-import SupportTicket from "../models/supportModel.js";
-import { adminOnly } from "../middleware/auth.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
-// GET ALL TICKETS
-router.get("/", adminOnly, async (req, res) => {
-  const tickets = await SupportTicket.find().sort({ createdAt: -1 });
-  res.json(tickets);
-});
+// Example schema (or import from models file if separated)
+const supportSchema = new mongoose.Schema({}, { strict: false });
+const Support = mongoose.model("Support", supportSchema);
 
-// UPDATE STATUS
-router.put("/:id", adminOnly, async (req, res) => {
-  const ticket = await SupportTicket.findByIdAndUpdate(
-    req.params.id,
-    { status: req.body.status },
-    { new: true }
-  );
-
-  res.json(ticket);
-});
-
-// DELETE
-router.delete("/:id", adminOnly, async (req, res) => {
-  await SupportTicket.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
+router.get("/", async (req, res) => {
+  try {
+    const data = await Support.find().sort({ createdAt: -1 });
+    res.json(data);
+  } catch (err) {
+    console.error("Support admin error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 export default router;
