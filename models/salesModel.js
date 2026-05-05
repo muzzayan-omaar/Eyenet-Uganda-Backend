@@ -6,28 +6,24 @@ const salesSchema = new mongoose.Schema(
     phone: String,
     email: String,
     company: String,
-
     customerType: String,
     location: String,
-
     product: String,
     budget: String,
     urgency: String,
-
     contactMethod: String,
     message: String,
-
     leadStatus: {
       type: String,
-      default: "new", // new | contacted | closed
+      default: "new",
     },
-
     leadScore: {
       type: Number,
-      default: 0, // optional upgrade later
+      default: 0,
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("SalesLead", salesSchema);
+export default mongoose.models.salesModel ||
+  mongoose.model("salesModel", salesSchema);

@@ -13,13 +13,15 @@ const supportSchema = new mongoose.Schema(
     contactMethod: String,
     message: String,
     accessNotes: String,
-    imageUrl: String, // (after upload handling)
+    imageUrl: String,
     status: {
       type: String,
-      default: "new", // new | in-progress | resolved
+      default: "new",
     },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("SupportTicket", supportSchema);
+// IMPORTANT FIX 👇 prevents OverwriteModelError
+export default mongoose.models.supportModel ||
+  mongoose.model("supportModel", supportSchema);

@@ -1,19 +1,16 @@
 import express from "express";
-import mongoose from "mongoose";
+import SupportTicket from "../models/supportModel.js";
 
 const router = express.Router();
 
-// Example schema (or import from models file if separated)
-const supportSchema = new mongoose.Schema({}, { strict: false });
-const Support = mongoose.model("Support", supportSchema);
-
+// GET all support tickets
 router.get("/", async (req, res) => {
   try {
-    const data = await Support.find().sort({ createdAt: -1 });
-    res.json(data);
+    const tickets = await SupportTicket.find().sort({ createdAt: -1 });
+    res.json(tickets);
   } catch (err) {
-    console.error("Support admin error:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch support tickets" });
   }
 });
 
