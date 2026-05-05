@@ -5,27 +5,52 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
 
+import supportRoutes from "./routes/supportRoutes.js";
+import salesRoutes from "./routes/salesRoutes.js";
+
+import supportAdminRoutes from "./routes/supportAdminRoutes.js";
+import salesAdminRoutes from "./routes/salesAdminRoutes.js";
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ========================
 // Middleware
-app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
+// ========================
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://eyenet-uganda.vercel.app",
+  "https://eyenet-uganda-backend.onrender.com"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ========================
 // MongoDB connection
 // ========================
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // ========================
-// MongoDB Schemas
+// Schemas
 // ========================
 const subscriberSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -55,20 +80,20 @@ const partnerSchema = new mongoose.Schema({
 const Partner = mongoose.model("Partner", partnerSchema);
 
 // ========================
-// Nodemailer setup
+// Email Setup
 // ========================
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: process.env.EMAIL_PORT,
-  secure: false, // true for 465, false for 587
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
 
-// Helper to send email
-const sendEmail = async ({ subject, html }) => {
+// reusable email sender
+export const sendEmail = async ({ subject, html }) => {
   try {
     await transporter.sendMail({
       from: `"Eyenet Uganda" <${process.env.EMAIL_USER}>`,
@@ -83,12 +108,16 @@ const sendEmail = async ({ subject, html }) => {
 
 // ========================
 // Routes
+app.use("/api/admin/support", supportAdminRoutes);
+app.use("/api/admin/sales", salesAdminRoutes);
 // ========================
 
 // Health check
 app.get("/", (req, res) => res.send("API running"));
 
-// ----------- Newsletter -----------
+// ========================
+// Newsletter
+// ========================
 app.post("/api/newsletter", async (req, res) => {
   const { email } = req.body;
 
@@ -98,11 +127,11 @@ app.post("/api/newsletter", async (req, res) => {
 
   try {
     const existing = await Subscriber.findOne({ email });
-    if (existing) return res.status(400).json({ message: "Email already subscribed" });
+    if (existing)
+      return res.status(400).json({ message: "Email already subscribed" });
 
     await Subscriber.create({ email });
 
-    // Send email notification
     await sendEmail({
       subject: "New Newsletter Subscription",
       html: `<p>New subscription from: ${email}</p>`,
@@ -115,9 +144,12 @@ app.post("/api/newsletter", async (req, res) => {
   }
 });
 
-// ----------- Contact -----------
+// ========================
+// Contact
+// ========================
 app.post("/api/contact", async (req, res) => {
   const { name, email, message } = req.body;
+
   if (!name || !email || !message) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -125,12 +157,13 @@ app.post("/api/contact", async (req, res) => {
   try {
     await Contact.create({ name, email, message });
 
-    // Send email notification
     await sendEmail({
       subject: `New Contact Message from ${name}`,
-      html: `<p><strong>Name:</strong> ${name}</p>
-             <p><strong>Email:</strong> ${email}</p>
-             <p><strong>Message:</strong><br/>${message}</p>`,
+      html: `
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Message:</b><br/>${message}</p>
+      `,
     });
 
     return res.status(200).json({ message: "Message sent successfully!" });
@@ -140,7 +173,9 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-// ----------- Become Partner -----------
+// ========================
+// Become Partner
+// ========================
 app.post("/api/becomepartner", async (req, res) => {
   const {
     companyName,
@@ -169,17 +204,17 @@ app.post("/api/becomepartner", async (req, res) => {
       message,
     });
 
-    // Send email notification
     await sendEmail({
       subject: `New Partnership Request from ${companyName}`,
-      html: `<p><strong>Company Name:</strong> ${companyName}</p>
-             <p><strong>Contact Name:</strong> ${contactName}</p>
-             <p><strong>Contact Title:</strong> ${contactTitle || "-"}</p>
-             <p><strong>Email:</strong> ${email}</p>
-             <p><strong>Phone:</strong> ${phone || "-"}</p>
-             <p><strong>Business Type:</strong> ${businessType}</p>
-             <p><strong>Territory:</strong> ${territory || "-"}</p>
-             <p><strong>Message:</strong><br/>${message || "-"}</p>`,
+      html: `
+        <p><b>Company:</b> ${companyName}</p>
+        <p><b>Contact:</b> ${contactName}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Phone:</b> ${phone || "-"}</p>
+        <p><b>Business Type:</b> ${businessType}</p>
+        <p><b>Territory:</b> ${territory || "-"}</p>
+        <p><b>Message:</b><br/>${message || "-"}</p>
+      `,
     });
 
     return res.status(200).json({ message: "Partnership request submitted!" });
@@ -190,6 +225,14 @@ app.post("/api/becomepartner", async (req, res) => {
 });
 
 // ========================
+// NEW ROUTES (Support + Sales)
+// ========================
+app.use("/api/support", supportRoutes);
+app.use("/api/sales", salesRoutes);
+
+// ========================
 // Start server
 // ========================
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);

@@ -15,7 +15,8 @@
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "mongoose": "^8.18.0",
-    "nodemailer": "^7.0.5",
+    "multer": "^2.1.1",
+    "nodemailer": "^7.0.13",
     "react-toastify": "^11.0.5"
   }
 }
