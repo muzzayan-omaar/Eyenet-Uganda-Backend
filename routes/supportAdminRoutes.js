@@ -9,6 +9,8 @@ const router = express.Router();
 // ========================
 const checkAdmin = (req, res, next) => {
   const key = req.headers["x-admin-key"];
+    console.log("👉 HEADER RECEIVED:", req.headers["x-admin-key"]);
+  console.log("👉 ENV KEY:", process.env.ADMIN_KEY);
 
   if (!process.env.ADMIN_KEY) {
     console.error("❌ ADMIN_KEY not set");
