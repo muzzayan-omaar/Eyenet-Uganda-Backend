@@ -55,6 +55,9 @@ router.put("/:id", checkAdmin, async (req, res) => {
 router.post("/reply", checkAdmin, async (req, res) => {
   const { email, message, subject } = req.body;
 
+  console.log("ADMIN HEADER:", req.headers["x-admin-key"]);
+console.log("EXPECTED:", process.env.ADMIN_KEY);
+
   if (!email || !message) {
     return res.status(400).json({ message: "Missing email or message" });
   }
