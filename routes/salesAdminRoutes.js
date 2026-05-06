@@ -1,18 +1,31 @@
 import express from "express";
 import SalesLead from "../models/salesModel.js";
 import { sendEmail } from "../server.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
 // 🔐 admin middleware
 const checkAdmin = (req, res, next) => {
-  const key = req.headers["x-admin-key"];
+  const authHeader = req.headers.authorization;
 
-  if (key !== process.env.ADMIN_KEY) {
-    return res.status(403).json({ message: "Unauthorized" });
+  if (!authHeader) {
+    return res.status(403).json({ message: "No token provided" });
   }
 
-  next();
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid token" });
+  }
 };
 
 // GET all leads

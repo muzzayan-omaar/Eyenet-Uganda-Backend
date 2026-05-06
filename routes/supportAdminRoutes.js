@@ -1,27 +1,35 @@
 import express from "express";
 import SupportTicket from "../models/supportModel.js";
 import { sendEmail } from "../server.js";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
 // ========================
 // ADMIN AUTH (ONLY ONCE)
 // ========================
+
+
 const checkAdmin = (req, res, next) => {
-  const key = req.headers["x-admin-key"];
-    console.log("👉 HEADER RECEIVED:", req.headers["x-admin-key"]);
-  console.log("👉 ENV KEY:", process.env.ADMIN_KEY);
+  const authHeader = req.headers.authorization;
 
-  if (!process.env.ADMIN_KEY) {
-    console.error("❌ ADMIN_KEY not set");
-    return res.status(500).json({ message: "Server misconfigured" });
+  if (!authHeader) {
+    return res.status(403).json({ message: "No token provided" });
   }
 
-  if (key !== process.env.ADMIN_KEY) {
-    return res.status(403).json({ message: "Unauthorized" });
-  }
+  const token = authHeader.split(" ")[1];
 
-  next();
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    req.admin = decoded;
+    next();
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid token" });
+  }
 };
 
 // ========================

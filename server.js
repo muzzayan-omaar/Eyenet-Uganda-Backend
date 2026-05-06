@@ -7,6 +7,7 @@ import { Resend } from "resend";
 
 import supportRoutes from "./routes/supportRoutes.js";
 import salesRoutes from "./routes/salesRoutes.js";
+import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 
 import supportAdminRoutes from "./routes/supportAdminRoutes.js";
 import salesAdminRoutes from "./routes/salesAdminRoutes.js";
@@ -103,6 +104,7 @@ export const sendEmail = async ({ to, subject, html }) => {
 // ========================
 // ROUTES
 // ========================
+app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/support", supportAdminRoutes);
 app.use("/api/admin/sales", salesAdminRoutes);
 
