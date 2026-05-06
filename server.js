@@ -87,22 +87,32 @@ const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS, // Gmail App Password
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 // reusable email sender
 export const sendEmail = async ({ to, subject, html }) => {
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"Eyenet Support" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     });
+
+    console.log("📧 Email sent:", info.messageId);
+    return info;
   } catch (err) {
-    console.error("Email error:", err);
-    throw err;
+    console.error("❌ Email error:", err.message);
+
+    // IMPORTANT: do not crash request
+    return null;
   }
 };
 
