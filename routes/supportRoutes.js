@@ -1,39 +1,22 @@
 import express from "express";
-import mongoose from "mongoose";
+import SupportTicket from "../models/supportModel.js";
 
 const router = express.Router();
 
-// Support Schema (temporary inline for now)
-const supportSchema = new mongoose.Schema(
-  {
-    fullName: String,
-    email: String,
-    phone: String,
-    company: String,
-    product: String,
-    issueType: String,
-    priority: String,
-    message: String,
-    createdAt: { type: Date, default: Date.now },
-  },
-  { strict: false }
-);
-
-const Support =
-  mongoose.models.Support || mongoose.model("Support", supportSchema);
-
 router.post("/", async (req, res) => {
   try {
-    console.log("SUPPORT BODY:", req.body);
+    console.log("📥 Incoming support request:", req.body);
 
-    const newSupport = await Support.create(req.body);
+    const newTicket = await SupportTicket.create(req.body);
 
-    res.status(200).json({
-      message: "Support request saved successfully",
-      data: newSupport,
+    console.log("✅ Saved to DB:", newTicket);
+
+    res.status(201).json({
+      message: "Support request submitted successfully",
+      data: newTicket,
     });
   } catch (err) {
-    console.error("Support save error:", err);
+    console.error("❌ SAVE ERROR:", err);
     res.status(500).json({ message: "Failed to save support request" });
   }
 });
