@@ -93,11 +93,11 @@ const transporter = nodemailer.createTransport({
 });
 
 // reusable email sender
-export const sendEmail = async ({ subject, html }) => {
+export const sendEmail = async ({ subject, html, to }) => {
   try {
     await transporter.sendMail({
       from: `"Eyenet Uganda" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_TO,
+      to: to || process.env.EMAIL_TO, // fallback to admin inbox
       subject,
       html,
     });
