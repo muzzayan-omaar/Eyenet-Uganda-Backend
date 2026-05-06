@@ -52,38 +52,20 @@ router.put("/:id", checkAdmin, async (req, res) => {
 // ========================
 // SEND REPLY EMAIL
 // ========================
-router.post("/reply", checkAdmin, async (req, res) => {
-  const { email, message, subject } = req.body;
+const checkAdmin = (req, res, next) => {
+  const key = req.headers["x-admin-key"];
 
-  console.log("ADMIN HEADER:", req.headers["x-admin-key"]);
-console.log("EXPECTED:", process.env.ADMIN_KEY);
-
-  if (!email || !message) {
-    return res.status(400).json({ message: "Missing email or message" });
+  if (!process.env.ADMIN_KEY) {
+    console.error("❌ ADMIN_KEY not set in environment variables");
+    return res.status(500).json({ message: "Server misconfigured" });
   }
 
-  try {
-    await sendEmail({
-      subject: subject || "Support Response - Eyenet Uganda",
-      html: `
-        <div style="font-family: Arial; line-height: 1.6;">
-          <h2 style="color:#0B1A2A;">Eyenet Support Response</h2>
-          <p>${message}</p>
-          <hr/>
-          <p style="font-size:12px;color:gray;">
-            This is an automated response from Eyenet Uganda Support Team.
-          </p>
-        </div>
-      `,
-      to: email,
-    });
-
-    return res.json({ message: "Reply sent successfully" });
-
-  } catch (err) {
-    console.error("Reply email error:", err);
-    return res.status(500).json({ message: "Failed to send reply" });
+  if (key !== process.env.ADMIN_KEY) {
+    console.warn("❌ Unauthorized admin access attempt");
+    return res.status(403).json({ message: "Unauthorized" });
   }
-});
+
+  next();
+};
 
 export default router;
