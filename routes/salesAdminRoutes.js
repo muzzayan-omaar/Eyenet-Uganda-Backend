@@ -1,5 +1,6 @@
 import express from "express";
 import SalesLead from "../models/salesModel.js";
+import { sendEmail } from "../server.js";
 
 const router = express.Router();
 
@@ -38,6 +39,39 @@ router.put("/:id", checkAdmin, async (req, res) => {
   } catch (err) {
     console.error("Sales update error:", err);
     res.status(500).json({ message: "Failed to update lead" });
+  }
+});
+// ========================
+// REPLY TO SALES LEAD
+// ========================
+router.post("/reply", checkAdmin, async (req, res) => {
+  const { email, message, subject } = req.body;
+
+  if (!email || !message) {
+    return res.status(400).json({ message: "Missing email or message" });
+  }
+
+  try {
+    await sendEmail({
+      to: email,
+      subject: subject || "Eyenet Uganda - Sales Inquiry Response",
+      html: `
+        <div style="font-family: Arial; line-height: 1.6;">
+          <h2 style="color:#0B1A2A;">Eyenet Sales Team</h2>
+          <p>${message}</p>
+          <hr/>
+          <p style="font-size:12px;color:gray;">
+            This is a response from Eyenet Uganda Sales Team.
+          </p>
+        </div>
+      `,
+    });
+
+    return res.json({ message: "Reply sent successfully" });
+
+  } catch (err) {
+    console.error("Sales reply error:", err);
+    return res.status(500).json({ message: "Failed to send reply" });
   }
 });
 
