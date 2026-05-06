@@ -70,8 +70,6 @@ router.post("/reply", checkAdmin, async (req, res) => {
   }
 
   try {
-    console.log("📤 Sending reply email to:", email);
-
     const result = await sendEmail({
       to: email,
       subject: subject || "Support Response - Eyenet Uganda",
@@ -84,30 +82,26 @@ router.post("/reply", checkAdmin, async (req, res) => {
           <hr/>
 
           <p style="font-size:12px;color:gray;">
-            This is an automated response from Eyenet Uganda Support Team.
+            Eyenet Uganda Support Team
           </p>
         </div>
       `,
     });
 
-    // if email failed
     if (!result) {
       return res.status(500).json({
-        message: "Email failed to send (SMTP issue)",
+        message: "Email failed (Resend error)",
       });
     }
-
-    console.log("✅ Reply email sent successfully");
 
     return res.json({
       message: "Reply sent successfully",
     });
 
   } catch (err) {
-    console.error("❌ Reply error:", err.message);
-
+    console.error("Reply error:", err);
     return res.status(500).json({
-      message: "Failed to send reply",
+      message: "Server error sending email",
     });
   }
 });

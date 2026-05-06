@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 import supportRoutes from "./routes/supportRoutes.js";
 import salesRoutes from "./routes/salesRoutes.js";
@@ -15,6 +15,8 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ========================
 // Middleware
@@ -81,37 +83,19 @@ const partnerSchema = new mongoose.Schema({
 const Partner = mongoose.model("Partner", partnerSchema);
 
 // ========================
-// 🔥 GMAIL EMAIL SETUP (FIXED)
-// ========================
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Gmail App Password
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
-  socketTimeout: 15000,
-});
-
-// reusable email sender
 export const sendEmail = async ({ to, subject, html }) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"Eyenet Support" <${process.env.EMAIL_USER}>`,
+    const result = await resend.emails.send({
+      from: "Eyenet Support <onboarding@resend.dev>",
       to,
       subject,
       html,
     });
 
-    console.log("📧 Email sent:", info.messageId);
-    return info;
+    console.log("📧 Email sent:", result);
+    return result;
   } catch (err) {
-    console.error("❌ Email error:", err.message);
-
-    // IMPORTANT: do not crash request
+    console.error("❌ Email error:", err);
     return null;
   }
 };
