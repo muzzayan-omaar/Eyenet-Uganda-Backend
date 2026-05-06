@@ -39,10 +39,11 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 // ========================
-// MongoDB connection
+// MongoDB
 // ========================
 mongoose
   .connect(process.env.MONGO_URI)
@@ -50,7 +51,7 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // ========================
-// Schemas
+// Schemas (unchanged)
 // ========================
 const subscriberSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
@@ -80,12 +81,10 @@ const partnerSchema = new mongoose.Schema({
 const Partner = mongoose.model("Partner", partnerSchema);
 
 // ========================
-// Email Setup
+// 🔥 GMAIL EMAIL SETUP (FIXED)
 // ========================
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false,
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -93,30 +92,38 @@ const transporter = nodemailer.createTransport({
 });
 
 // reusable email sender
-export const sendEmail = async ({ subject, html, to }) => {
+export const sendEmail = async ({ to, subject, html }) => {
   try {
     await transporter.sendMail({
-      from: `"Eyenet Uganda" <${process.env.EMAIL_USER}>`,
-      to: to || process.env.EMAIL_TO, // fallback to admin inbox
+      from: `"Eyenet Support" <${process.env.EMAIL_USER}>`,
+      to,
       subject,
       html,
     });
   } catch (err) {
     console.error("Email error:", err);
+    throw err;
   }
 };
 
 // ========================
-// Routes
+// ROUTES
+// ========================
 app.use("/api/admin/support", supportAdminRoutes);
 app.use("/api/admin/sales", salesAdminRoutes);
-// ========================
 
-// Health check
-app.get("/", (req, res) => res.send("API running"));
+app.use("/api/support", supportRoutes);
+app.use("/api/sales", salesRoutes);
 
 // ========================
-// Newsletter
+// HEALTH CHECK
+// ========================
+app.get("/", (req, res) => {
+  res.send("API running");
+});
+
+// ========================
+// NEWSLETTER
 // ========================
 app.post("/api/newsletter", async (req, res) => {
   const { email } = req.body;
@@ -127,14 +134,16 @@ app.post("/api/newsletter", async (req, res) => {
 
   try {
     const existing = await Subscriber.findOne({ email });
-    if (existing)
+    if (existing) {
       return res.status(400).json({ message: "Email already subscribed" });
+    }
 
     await Subscriber.create({ email });
 
     await sendEmail({
+      to: process.env.EMAIL_USER,
       subject: "New Newsletter Subscription",
-      html: `<p>New subscription from: ${email}</p>`,
+      html: `<p>New subscription: ${email}</p>`,
     });
 
     return res.status(200).json({ message: "Subscribed successfully!" });
@@ -145,28 +154,29 @@ app.post("/api/newsletter", async (req, res) => {
 });
 
 // ========================
-// Contact
+// CONTACT
 // ========================
 app.post("/api/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message: "All fields required" });
   }
 
   try {
     await Contact.create({ name, email, message });
 
     await sendEmail({
-      subject: `New Contact Message from ${name}`,
+      to: process.env.EMAIL_USER,
+      subject: `Contact from ${name}`,
       html: `
         <p><b>Name:</b> ${name}</p>
         <p><b>Email:</b> ${email}</p>
-        <p><b>Message:</b><br/>${message}</p>
+        <p>${message}</p>
       `,
     });
 
-    return res.status(200).json({ message: "Message sent successfully!" });
+    return res.status(200).json({ message: "Message sent!" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });
@@ -174,13 +184,12 @@ app.post("/api/contact", async (req, res) => {
 });
 
 // ========================
-// Become Partner
+// PARTNER
 // ========================
 app.post("/api/becomepartner", async (req, res) => {
   const {
     companyName,
     contactName,
-    contactTitle,
     email,
     phone,
     businessType,
@@ -189,14 +198,13 @@ app.post("/api/becomepartner", async (req, res) => {
   } = req.body;
 
   if (!companyName || !contactName || !email || !businessType) {
-    return res.status(400).json({ message: "Required fields are missing" });
+    return res.status(400).json({ message: "Missing fields" });
   }
 
   try {
     await Partner.create({
       companyName,
       contactName,
-      contactTitle,
       email,
       phone,
       businessType,
@@ -205,19 +213,17 @@ app.post("/api/becomepartner", async (req, res) => {
     });
 
     await sendEmail({
-      subject: `New Partnership Request from ${companyName}`,
+      to: process.env.EMAIL_USER,
+      subject: `New Partner Request - ${companyName}`,
       html: `
         <p><b>Company:</b> ${companyName}</p>
         <p><b>Contact:</b> ${contactName}</p>
         <p><b>Email:</b> ${email}</p>
-        <p><b>Phone:</b> ${phone || "-"}</p>
-        <p><b>Business Type:</b> ${businessType}</p>
-        <p><b>Territory:</b> ${territory || "-"}</p>
-        <p><b>Message:</b><br/>${message || "-"}</p>
+        <p>${message || "-"}</p>
       `,
     });
 
-    return res.status(200).json({ message: "Partnership request submitted!" });
+    return res.status(200).json({ message: "Partner request sent!" });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });
@@ -225,14 +231,8 @@ app.post("/api/becomepartner", async (req, res) => {
 });
 
 // ========================
-// NEW ROUTES (Support + Sales)
+// START SERVER
 // ========================
-app.use("/api/support", supportRoutes);
-app.use("/api/sales", salesRoutes);
-
-// ========================
-// Start server
-// ========================
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
