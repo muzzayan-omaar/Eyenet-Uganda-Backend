@@ -11,6 +11,7 @@ import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 
 import supportAdminRoutes from "./routes/supportAdminRoutes.js";
 import salesAdminRoutes from "./routes/salesAdminRoutes.js";
+import seedAdminRoute from "./routes/seedAdmin.js";
 
 dotenv.config();
 
@@ -107,9 +108,11 @@ export const sendEmail = async ({ to, subject, html }) => {
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/support", supportAdminRoutes);
 app.use("/api/admin/sales", salesAdminRoutes);
-
+app.use("/api/admin/seed", seedAdminRoute);
 app.use("/api/support", supportRoutes);
 app.use("/api/sales", salesRoutes);
+app.use("/api/seed-admin", seedAdmin);
+
 
 // ========================
 // HEALTH CHECK
