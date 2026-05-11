@@ -8,11 +8,11 @@ const router = express.Router();
 // ========================
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log("ADMIN FOUND:", admin);
+ 
 
   try {
     const admin = await Admin.findOne({ email });
-
+ console.log("ADMIN FOUND:", admin);
     // ✅ SAFE CHECK (THIS WAS MISSING)
     if (!admin) {
       return res.status(401).json({ message: "Invalid credentials" });
