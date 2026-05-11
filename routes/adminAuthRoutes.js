@@ -1,12 +1,8 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
+import Admin from "../models/adminModel.js"; // ✅ IMPORT MODEL
 
 const router = express.Router();
-
-// simple admin schema (you already have admin in DB, so we just use collection directly)
-const Admin = mongoose.model("Admin");
-
 // ========================
 // LOGIN
 // ========================
