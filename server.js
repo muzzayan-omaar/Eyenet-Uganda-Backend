@@ -111,7 +111,6 @@ app.use("/api/admin/sales", salesAdminRoutes);
 app.use("/api/admin/seed", seedAdminRoute);
 app.use("/api/support", supportRoutes);
 app.use("/api/sales", salesRoutes);
-app.use("/api/seed-admin", seedAdmin);
 
 
 // ========================
