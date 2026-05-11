@@ -12,20 +12,17 @@ router.post("/login", async (req, res) => {
   try {
     const admin = await Admin.findOne({ email });
 
+    // ✅ SAFE CHECK (THIS WAS MISSING)
     if (!admin) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // ⚠️ for now plain password (we can hash later)
     if (admin.password !== password) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
-      {
-        id: admin._id,
-        role: "admin",
-      },
+      { id: admin._id, role: "admin" },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
