@@ -2,14 +2,40 @@ import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
-    title: String,
-    image: String,
-    shortDescription: String,
-    description: String,
-    price: String,
+    title: {
+      type: String,
+      required: true,
+    },
+
+    image: {
+      type: String,
+      required: true,
+    },
+
+    shortDescription: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      required: true,
+    },
+
+    price: {
+      type: String,
+      required: true,
+    },
+
     category: {
       type: String,
       enum: ["CCTV", "Alarms", "Perimeter"],
+      required: true,
+    },
+
+    available: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
