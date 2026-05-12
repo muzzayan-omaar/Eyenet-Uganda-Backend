@@ -29,7 +29,7 @@ const productSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["CCTV", "Alarms", "Perimeter"],
+      enum: ["CCTV", "Alarms", "Perimeter", "Access Control", "Intercoms", "Fire Safety", "Other"],
       required: true,
     },
 
