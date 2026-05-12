@@ -15,6 +15,7 @@ import seedAdminRoute from "./routes/seedAdmin.js";
 import productRoutes from "./routes/productRoutes.js";
 import productAdminRoutes from "./routes/productAdminRoutes.js";
 
+
 dotenv.config();
 
 const app = express();
