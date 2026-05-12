@@ -14,6 +14,7 @@ import salesAdminRoutes from "./routes/salesAdminRoutes.js";
 import seedAdminRoute from "./routes/seedAdmin.js";
 import productRoutes from "./routes/productRoutes.js";
 import productAdminRoutes from "./routes/productAdminRoutes.js";
+import customPackageRoutes from "./routes/customPackageRoutes.js";
 
 
 dotenv.config();
@@ -116,7 +117,7 @@ app.use("/api/support", supportRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/admin/products", productAdminRoutes);
-
+app.use("/api/custom-packages", customPackageRoutes);
 
 // ========================
 // HEALTH CHECK
