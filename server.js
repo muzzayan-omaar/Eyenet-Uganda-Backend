@@ -12,6 +12,8 @@ import adminAuthRoutes from "./routes/adminAuthRoutes.js";
 import supportAdminRoutes from "./routes/supportAdminRoutes.js";
 import salesAdminRoutes from "./routes/salesAdminRoutes.js";
 import seedAdminRoute from "./routes/seedAdmin.js";
+import productRoutes from "./routes/productRoutes.js";
+import productAdminRoutes from "./routes/productAdminRoutes.js";
 
 dotenv.config();
 
@@ -111,6 +113,8 @@ app.use("/api/admin/sales", salesAdminRoutes);
 app.use("/api/admin/seed", seedAdminRoute);
 app.use("/api/support", supportRoutes);
 app.use("/api/sales", salesRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/admin/products", productAdminRoutes);
 
 
 // ========================
