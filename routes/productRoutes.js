@@ -11,13 +11,7 @@ const router = express.Router();
 // CLOUDINARY STORAGE
 // ======================
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "eyenet-products",
-    allowed_formats: ["jpg", "png", "jpeg", "webp"],
-  },
-});
+
 
 const upload = multer({ storage });
 
