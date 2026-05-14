@@ -31,7 +31,8 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://eyenet-uganda.vercel.app",
-  "https://eyenet-uganda-backend.onrender.com"
+  "https://eyenet-uganda-backend.onrender.com",
+  "https://www.eyenetuganda.net",
 ];
 
 app.use(
