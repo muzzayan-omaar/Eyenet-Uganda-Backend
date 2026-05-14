@@ -32,7 +32,7 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",
   "https://eyenet-uganda.vercel.app",
   "https://eyenet-uganda-backend.onrender.com",
-  "https://www.eyenetuganda.net",
+  "https://eyenetuganda.net",
 ];
 
 app.use(
